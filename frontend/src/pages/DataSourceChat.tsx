@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -355,7 +355,7 @@ function NotebookCell({
 // ─── NEW INTERACTIVE DATA GRID COMPONENT ──────────────────────────────────────
 function InteractiveDataGrid({
   sourceId,
-  sourceType,
+  sourceType: _sourceType,
   tableName = null
 }: {
   sourceId: string,
@@ -523,7 +523,7 @@ function DsDashboardGrid({
   const [containerWidth, setContainerWidth] = useState(1200);
   const STORAGE_KEY = `ds-dashboard-layout-${sourceId}`;
 
-  const [layout, setLayout] = useState<Layout>(() => {
+  const [layout, setLayout] = useState<Layout[]>(() => {
     try { const s = localStorage.getItem(STORAGE_KEY); return s ? JSON.parse(s) : []; }
     catch { return []; }
   });
@@ -531,20 +531,20 @@ function DsDashboardGrid({
   useEffect(() => {
     if (!pinnedItems.length) return;
     setLayout(prev => {
-      const existingMap = new Map(prev.map(l => [l.i, l]));
+      const existingMap = new Map(prev.map((l: Layout) => [l.i, l]));
       const pinIds = new Set(pinnedItems.map(p => p.id));
-      const cleaned = prev.filter(l => pinIds.has(l.i));
+      const cleaned = prev.filter((l: Layout) => pinIds.has(l.i));
       const toAdd = pinnedItems
         .filter(p => !existingMap.has(p.id))
         .map((p, i) => {
           const offset = cleaned.length + i;
           return { i: p.id, x: (offset % 2) * 6, y: Math.floor(offset / 2) * 9, w: 6, h: 8, minH: 4, minW: 3 };
         });
-      return [...cleaned, ...toAdd] as Layout;
+      return [...cleaned, ...toAdd] as Layout[];
     });
   }, [pinnedItems]);
 
-  const handleLayoutChange = (newLayout: Layout) => {
+  const handleLayoutChange = (newLayout: Layout[]) => {
     setLayout(newLayout);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newLayout));
   };
@@ -652,7 +652,7 @@ function DsDashboardGrid({
         >
           {pinnedItems.map((pin, idx) => {
             const accent = PANEL_ACCENTS_DS[idx % PANEL_ACCENTS_DS.length];
-            const itemLayout = layout.find(l => l.i === pin.id);
+            const itemLayout = layout.find((l: Layout) => l.i === pin.id);
             const h = itemLayout?.h ?? 8;
             const totalPx = dsPanelToPx(h);
             const chartPx = Math.max(totalPx - 46, 80);

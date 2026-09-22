@@ -8,9 +8,7 @@ import Workspaces from "./pages/Workspaces";
 import DataSourceChat from "./pages/DataSourceChat";
 import WorkspaceNotebook from "./pages/WorkspaceNotebook";
 
-function Overview() {
-  return <div className="p-8 text-white">Overview Dashboard Coming Soon...</div>;
-}
+import React from "react";
 
 function Settings() {
   return (
@@ -31,7 +29,7 @@ function Settings() {
 
 // --- ROUTE GUARD ---
 // This wrapper checks for a token before rendering its children
-function ProtectedRoute({ children }: { children }) {
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem("token");
   
   if (!token) {

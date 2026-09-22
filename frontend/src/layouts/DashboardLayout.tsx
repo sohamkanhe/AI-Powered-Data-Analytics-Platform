@@ -1,6 +1,5 @@
 import { Link, useLocation, Outlet } from "react-router-dom";
 import { 
-  LayoutDashboard, 
   Database, 
   TerminalSquare, 
   Settings, 

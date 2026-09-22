@@ -345,7 +345,7 @@ function NotebookCell({
 // Note: We now require sourceId. We guard against undefined in the useQuery.
 function InteractiveDataGrid({
   sourceId,
-  sourceType,
+  sourceType: _sourceType,
   tableName = null
 }: {
   sourceId?: string,
@@ -506,7 +506,7 @@ function DashboardGrid({
   const STORAGE_KEY = `dashboard-layout-${workspaceId}`;
 
   // v1 Layout type: Array of { i, x, y, w, h }
-  const [layout, setLayout] = useState<Layout>(() => {
+  const [layout, setLayout] = useState<Layout[]>(() => {
     try { const s = localStorage.getItem(STORAGE_KEY); return s ? JSON.parse(s) : []; }
     catch { return []; }
   });
@@ -515,9 +515,9 @@ function DashboardGrid({
   useEffect(() => {
     if (!pinnedItems.length) return;
     setLayout(prev => {
-      const existingMap = new Map(prev.map(l => [l.i, l]));
+      const existingMap = new Map(prev.map((l: Layout) => [l.i, l]));
       const pinIds = new Set(pinnedItems.map(p => p.id));
-      const cleaned = prev.filter(l => pinIds.has(l.i));
+      const cleaned = prev.filter((l: Layout) => pinIds.has(l.i));
       const toAdd = pinnedItems
         .filter(p => !existingMap.has(p.id))
         .map((p, i) => {
@@ -525,11 +525,11 @@ function DashboardGrid({
           // 2 columns, each 6 wide; 8 rows tall by default
           return { i: p.id, x: (offset % 2) * 6, y: Math.floor(offset / 2) * 9, w: 6, h: 8, minH: 4, minW: 3 };
         });
-      return [...cleaned, ...toAdd] as Layout;
+      return [...cleaned, ...toAdd] as Layout[];
     });
   }, [pinnedItems]);
 
-  const handleLayoutChange = (newLayout: Layout) => {
+  const handleLayoutChange = (newLayout: Layout[]) => {
     setLayout(newLayout);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newLayout));
   };
@@ -638,7 +638,7 @@ function DashboardGrid({
         >
           {pinnedItems.map((pin, idx) => {
             const accent = PANEL_ACCENTS[idx % PANEL_ACCENTS.length];
-            const itemLayout = layout.find(l => l.i === pin.id);
+            const itemLayout = layout.find((l: Layout) => l.i === pin.id);
             const h = itemLayout?.h ?? 8;
             const totalPx = panelToPx(h);
             const headerPx = 42;
@@ -1225,7 +1225,7 @@ export default function WorkspaceNotebook() {
               <div className="flex-1 p-6 bg-[#111111] overflow-y-auto flex items-center justify-center border-b lg:border-b-0 lg:border-r border-white/5">
                 <div className="w-full max-w-3xl">
                   {/* Full size chart */}
-                  <ChartBlock block={{ ...expandedPin.chartBlock, spec: { ...expandedPin.chartBlock.spec, height: 400 } }} />
+                  <VegaChart block={{ ...expandedPin.chartBlock, spec: { ...expandedPin.chartBlock.spec, height: 400 } } as ChartUIBlock} />
                 </div>
               </div>
 
