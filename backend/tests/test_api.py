@@ -1,3 +1,10 @@
+import sys
+from unittest.mock import MagicMock
+
+# Mock out Gemini / Google GenAI module before importing app so Gemini is never initialized
+mock_genai = MagicMock()
+sys.modules["langchain_google_genai"] = mock_genai
+
 import pytest
 from fastapi.testclient import TestClient
 from main import app
