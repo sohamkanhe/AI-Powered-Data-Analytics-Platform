@@ -19,7 +19,7 @@ def test_sandbox_code_execution_success():
     assert res["result"]["count"] == 3
 
 def test_sandbox_code_execution_missing_result_dict():
-    df_json = "{}"
+    df_json = ""
     code = "x = 10 + 20"
 
     result_queue = multiprocessing.Queue()
