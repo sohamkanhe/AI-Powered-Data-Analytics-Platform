@@ -36,6 +36,16 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+      minio:
+        image: minio/minio
+        ports:
+          - 9000:9000
+          - 9001:9001
+        env:
+          MINIO_ROOT_USER: minioadmin
+          MINIO_ROOT_PASSWORD: minioadmin
+        command: server /data --console-address ":9001"
+
     defaults:
       run:
         working-directory: ./backend
@@ -71,6 +81,10 @@ jobs:
           DATABASE_URL_PG: postgresql+asyncpg://admin:admin@localhost:5432/da_agent_db
           REDIS_HOST: localhost
           REDIS_PORT: 6379
+          MINIO_URL: http://localhost:9000
+          ACCESS_KEY: minioadmin
+          SECRET_KEY: minioadmin
+          GOOGLE_API_KEY: dummy_key_for_ci_testing
         run: |
           pytest -v
 
