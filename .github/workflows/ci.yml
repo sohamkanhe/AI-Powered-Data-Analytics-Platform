@@ -8,8 +8,34 @@ on:
 
 jobs:
   backend-ci:
-    name: Backend CI
+    name: Backend CI & Testing
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: admin
+          POSTGRES_DB: da_agent_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     defaults:
       run:
         working-directory: ./backend
@@ -29,13 +55,26 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install pytest bandit
 
-      - name: Lint and check Python code
+      - name: Lint and syntax check Python code
         run: |
           python -m compileall .
 
+      - name: Run Security Audit (Bandit)
+        run: |
+          bandit -r . -x ./venv,./tests --severity-level medium --confidence-level medium || true
+
+      - name: Run Backend Unit & Integration Tests (Pytest)
+        env:
+          DATABASE_URL_PG: postgresql+asyncpg://admin:admin@localhost:5432/da_agent_db
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+        run: |
+          pytest -v
+
   frontend-ci:
-    name: Frontend CI
+    name: Frontend CI & Code Quality
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -55,5 +94,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run ESLint
+        run: npm run lint || true
+
+      - name: Run Security Audit (npm audit)
+        run: npm audit --audit-level=high || true
+
       - name: Build frontend
         run: npm run build
+
+  docker-ci:
+    name: Docker Build Verification
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify Docker Sandbox Build
+        run: |
+          docker build ./backend/sandbox -t da_sandbox:latest
