@@ -1,0 +1,10 @@
+import sqlite3
+conn = sqlite3.connect('./test.db')
+cur = conn.cursor()
+cur.execute("PRAGMA table_info(users)")
+print('User cols:', [r[1] for r in cur.fetchall()])
+cur.execute("SELECT * FROM users LIMIT 5")
+print('Users:', cur.fetchall())
+cur.execute("SELECT id, dataset_name, user_id FROM data_sources LIMIT 5")
+print('Sources:', cur.fetchall())
+conn.close()
