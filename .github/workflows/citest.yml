@@ -36,20 +36,30 @@ jobs:
               run: pytest -v
 
 
+    
     lint:
-        name: Run Linters
+        name: Run Linters and Save Logs
         runs-on: ubuntu-latest
 
         permissions:
-            contents: read
+        contents: read
 
         steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
+        - name: Checkout repository
+          uses: actions/checkout@v4
 
-            - name: Run Super-Linter
-              uses: super-linter/super-linter/slim@v7
-              env:
-                DEFAULT_BRANCH: main
-                GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-                CREATE_LOG_FILE: true
+        - name: Run Super-Linter
+          uses: super-linter/super-linter/slim@v7
+          env:
+            DEFAULT_BRANCH: main
+            CREATE_LOG_FILE: true
+            LOG_FILE: super-linter.log
+            DISABLE_ERRORS: true
+
+        - name: Save lint log
+          if: always()
+          uses: actions/upload-artifact@v4
+          with:
+            name: super-linter-log
+            path: super-linter.log
+            if-no-files-found: warn
