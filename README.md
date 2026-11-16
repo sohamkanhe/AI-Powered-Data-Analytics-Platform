@@ -4,7 +4,7 @@
 ---
 
 **Project Title:** Insights — Conversational Data Analytics Agent  
-**Technology Stack:** FastAPI · LangGraph · DuckDB · PostgreSQL · MinIO · Redis · React · Vite · TypeScript  
+**Technology Stack:** FastAPI · LangGraph · DuckDB · MySQL · MinIO · Redis · React · Vite · JavaScript  
 **Date:** May 2026  
 
 ---
